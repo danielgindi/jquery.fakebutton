@@ -52,7 +52,7 @@
                         .removeClass('active') // Remove hover class
                         .off('touchend.fakebutton') // Unhook touchend
                         .off('touchcancel.fakebutton'); // Unhook touchcancel
-                    $(window).off('scroll');
+                    $(window).off('scroll', scrollHandler);
                     if (!didScroll) {
                         $this.click();
                     }
@@ -61,7 +61,7 @@
                         .removeClass('active') // Remove hover class
                         .off('touchend.fakebutton') // Unhook touchend
                         .off('touchcancel.fakebutton'); // Unhook touchcancel
-                    $(window).off('scroll');
+                    $(window).off('scroll', scrollHandler);
                 });
         });
         return this;
