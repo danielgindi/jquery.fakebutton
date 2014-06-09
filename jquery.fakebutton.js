@@ -8,9 +8,12 @@
 */
 (function($){
     
-    var didScroll = false, scrollHandler = function () {
-        didScroll = true;
-    };
+    function touchById(touches, touchId) {
+        for (var i = 0; i < touches.length; i++) {
+            if (touches[i].identifier === touchId) return touches[i];
+        }
+        return null;
+    }
                 
     /** @expose */
     $.fn.fakebutton = function (tabIndex) {
@@ -30,39 +33,59 @@
             if (event.target === this && (event.which === 13 || event.which === 32)) {
                 event.preventDefault();
                 $this
-                    .addClass('active') // Add hover class
+                    .addClass('active') // Add active class
                     .on('keyup.fakebutton', function (event) { // Hook event for keyup
                         if (event.target === this && (event.which === 13 || event.which === 32)) {
                             event.preventDefault();
                             $this
-                                .removeClass('active') // Remove hover class
+                                .removeClass('active') // Remove active class
                                 .off('keyup.fakebutton') // Unhook keypress
                                 .click(); // Trigger click
                         }
                     });
             }
         }).on('touchstart.fakebutton', function (event) {
-            var $this = $(this);
-            didScroll = false;
-            $(window).on('scroll', scrollHandler);
+            var $this = $(this),
+                didScroll = false, 
+                scrollHandler = function () {
+                    didScroll = true;
+                },
+                touchId = event.originalEvent.changedTouches[0].identifier,
+                active = true;
+            
+            var onCancel = function () {
+                $this
+                    .removeClass('active') // Remove active class
+                    .off('touchmove.fakebutton') // Unhook touchmove
+                    .off('touchend.fakebutton') // Unhook touchend
+                    .off('touchcancel.fakebutton'); // Unhook touchcancel
+                    
+                $(window)
+                    .off('scroll.fakebutton', scrollHandler) // Stop tracking scroll;
+            };
+            
+            $(window).on('scroll.fakebutton', scrollHandler); // Start tracking scroll to prevent "click" after scroll
+        
             $this
-                .addClass('active') // Add hover class
-                .on('touchend.fakebutton', function (event) { // Hook event for keyup
-                    $this
-                        .removeClass('active') // Remove hover class
-                        .off('touchend.fakebutton') // Unhook touchend
-                        .off('touchcancel.fakebutton'); // Unhook touchcancel
-                    $(window).off('scroll', scrollHandler);
-                    if (!didScroll) {
+                .addClass('active') // Add active class
+                .on('touchmove.fakebutton', function (event) { // Start tracking touch movement to see if we are still on top
+                
+                    var touch = touchById(event.originalEvent.changedTouches, touchId);
+                    if (!touch) return;
+
+                    var element = document.elementFromPoint(touch.pageX, touch.pageY);
+                    active = element && (this === element || $.contains(this, element));
+                    $this.toggleClass('active', active);
+                    
+                }).on('touchend.fakebutton', function (event) { // Hook event for keyup
+                
+                    onCancel();
+                    if (active && !didScroll && !event.isDefaultPrevented()) {
                         $this.click();
+                        event.preventDefault();
                     }
-                }).on('touchcancel.fakebutton', function (event) {
-                    $this
-                        .removeClass('active') // Remove hover class
-                        .off('touchend.fakebutton') // Unhook touchend
-                        .off('touchcancel.fakebutton'); // Unhook touchcancel
-                    $(window).off('scroll', scrollHandler);
-                });
+                    
+                }).on('touchcancel.fakebutton', onCancel);
         });
         return this;
     };
