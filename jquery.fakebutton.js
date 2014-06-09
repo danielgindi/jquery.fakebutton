@@ -11,7 +11,7 @@
     var didScroll = false, scrollHandler = function () {
         didScroll = true;
     };
-            
+                
     /** @expose */
     $.fn.fakebutton = function (tabIndex) {
         if (tabIndex !== false) {
@@ -32,10 +32,12 @@
                 $this
                     .addClass('active') // Add hover class
                     .on('keyup.fakebutton', function (event) { // Hook event for keyup
-                        $this.off('keyup.fakebutton'); // Unhook keypress
                         if (event.target === this && (event.which === 13 || event.which === 32)) {
                             event.preventDefault();
-                            $(this).removeClass('active').click();
+                            $this
+                                .removeClass('active') // Remove hover class
+                                .off('keyup.fakebutton') // Unhook keypress
+                                .click(); // Trigger click
                         }
                     });
             }
