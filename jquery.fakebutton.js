@@ -44,13 +44,13 @@
                         }
                     });
             }
-        }).on('touchstart.fakebutton', function (event) {
+        }).on('touchstart.fakebutton', function (startEvent) {
             var $this = $(this),
                 didScroll = false, 
                 scrollHandler = function () {
                     didScroll = true;
                 },
-                touchId = event.originalEvent.changedTouches[0].identifier,
+                touchId = startEvent.originalEvent.changedTouches[0].identifier,
                 active = true;
             
             var onCancel = function () {
@@ -79,9 +79,18 @@
                     
                 }).on('touchend.fakebutton', function (event) { // Hook event for keyup
                 
+                    var touch = touchById(event.originalEvent.changedTouches, touchId);
+                    if (!touch) return;
+                    
                     onCancel();
                     if (active && !didScroll && !event.isDefaultPrevented()) {
-                        $this.click();
+                        var fakeEvent = $.Event('click');
+                        $.each(['target', 'clientX', 'clientY', 'offsetX', 'offsetY', 'screenX', 'screenY', 'pageX', 'pageY'],
+                                function () {
+                            fakeEvent[this] = startEvent[this];
+                            fakeEvent[this] = touch[this];
+                        });
+                        $this.trigger(fakeEvent);
                         event.preventDefault();
                     }
                     
