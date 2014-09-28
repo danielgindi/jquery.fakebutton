@@ -27,6 +27,8 @@
             });
         }
 
+        this.unfakebutton();
+
         this.on('keydown.fakebutton', function (event) {
             var $this = $(this);
             if (event.target === this && (event.which === 13 || event.which === 32)) {
