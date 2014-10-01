@@ -3,7 +3,7 @@
 // @externs_url https://raw.githubusercontent.com/google/closure-compiler/master/contrib/externs/jquery-1.9.js
 // ==/ClosureCompiler==
 /** @preserve    Library by Daniel Cohen Gindi (danielgindi@gmail.com) 054-5655765
- MIT License!
+    MIT License!
  */
 (function($){
 
@@ -52,14 +52,19 @@
                     didScroll = true;
                 },
                 touchId = startEvent.originalEvent.changedTouches[0].identifier,
-                active = true;
+                active = true,
+                ghostBuster = 0; // Some Android browsers to not support preventDefault(), we need to do catch the ghost events
 
-            var onCancel = function () {
+            var onCancel = function (event) {
                 $this
                     .removeClass('active') // Remove active class
                     .off('touchmove.fakebutton') // Unhook touchmove
                     .off('touchend.fakebutton') // Unhook touchend
                     .off('touchcancel.fakebutton'); // Unhook touchcancel
+
+                if (event.type === 'touchcancel') {
+                    $this.off('mousedown.fakebutton');
+                }
 
                 trackedScrolling.off('scroll.fakebutton', scrollHandler) // Stop tracking scroll;
             };
@@ -83,7 +88,7 @@
                     var touch = touchById(event.originalEvent.changedTouches, touchId);
                     if (!touch) return;
 
-                    onCancel();
+                    onCancel(event);
                     if (active && !didScroll && !event.isDefaultPrevented()) {
                         var fakeEvent = $.Event('click');
                         $.each(['target', 'clientX', 'clientY', 'offsetX', 'offsetY', 'screenX', 'screenY', 'pageX', 'pageY'],
@@ -95,7 +100,14 @@
                         event.preventDefault();
                     }
 
-                }).on('touchcancel.fakebutton', onCancel);
+                }).on('touchcancel.fakebutton', onCancel)
+                .on('mousedown.fakebutton', function (event) {
+                    if ((+new Date - ghostBuster) <= 500) { // Bust the ghost mouse events on old Android browsers
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    $this.off('mousedown.fakebutton');
+                });
         });
         return this;
     };
