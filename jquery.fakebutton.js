@@ -89,6 +89,7 @@
                     if (!touch) return;
 
                     onCancel(event);
+
                     if (active && !didScroll && !event.isDefaultPrevented()) {
                         var fakeEvent = $.Event('click');
                         $.each(['target', 'clientX', 'clientY', 'offsetX', 'offsetY', 'screenX', 'screenY', 'pageX', 'pageY'],
