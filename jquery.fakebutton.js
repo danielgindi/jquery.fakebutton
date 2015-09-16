@@ -97,8 +97,10 @@
                                 fakeEvent[this] = startEvent[this];
                                 fakeEvent[this] = touch[this];
                             });
-                        $this.trigger(fakeEvent);
                         event.preventDefault();
+                        setTimeout(function () {
+                            $this.trigger(fakeEvent);
+                        }, 0);
                     }
 
                 }).on('touchcancel.fakebutton', onCancel)
