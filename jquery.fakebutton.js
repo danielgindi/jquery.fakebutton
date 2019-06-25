@@ -5,7 +5,16 @@
 /** @preserve    Library by Daniel Cohen Gindi (danielgindi@gmail.com)
     MIT License!
  */
-(function($){
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('jquery.fakebutton', ['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        module.exports = factory(require('jquery'));
+    } else {
+        /*root.fakebutton = */factory(root.jQuery);
+    }
+}(this, function ($) {
+    'use strict';
 
     function touchById(touches, touchId) {
         for (var i = 0; i < touches.length; i++) {
@@ -121,4 +130,4 @@
         return this;
     };
 
-})(jQuery);
+}));
