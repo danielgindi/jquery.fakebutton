@@ -13,7 +13,7 @@
     } else {
         /*root.fakebutton = */factory(root.jQuery);
     }
-}(this, function ($) {
+}(this || (typeof window !== 'undefined' ? window : null), function ($) {
     'use strict';
 
     function touchById(touches, touchId) {
